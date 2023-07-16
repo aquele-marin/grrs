@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use clap::Parser;
+use anyhow::{Context, Result};
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
@@ -11,17 +12,18 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Cli::parse();
-    let content = std::fs::read_to_string(&args.path).expect("could not read file");
+    // Reads file handling errors with a custom message using anyhow package
+    let content = std::fs::read_to_string(&args.path)
+        .with_context(|| format!("could not read file `{}`", &args.path.display()))?;
+    println!("file content: {}", content);
+
 
     for line in content.lines() {
         if line.contains(&args.pattern) {
             println!("{}", line);
         }
     }
-
-
-
-    // println!("{} {}", args.pattern, args.path.display());
+    Ok(())
 }
