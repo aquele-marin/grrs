@@ -17,13 +17,20 @@ fn main() -> Result<()> {
     // Reads file handling errors with a custom message using anyhow package
     let content = std::fs::read_to_string(&args.path)
         .with_context(|| format!("could not read file `{}`", &args.path.display()))?;
-    println!("file content: {}", content);
+    println!("file content:\n {}", content);
 
+    let lines = content.lines().count() as u64;
+    let pb = indicatif::ProgressBar::new(lines);
 
-    for line in content.lines() {
+    for (i,line) in content.lines().enumerate() {
         if line.contains(&args.pattern) {
-            println!("{}", line);
+            // println!("{}", line);
+            pb.println(format!("[+] finished #{} || FOUND TEXT: {}", i, line));
+        } else {
+            pb.println(format!("[+] finished #{}", i));
         }
+        pb.inc(1);
     }
+    pb.finish_with_message("done");
     Ok(())
 }
